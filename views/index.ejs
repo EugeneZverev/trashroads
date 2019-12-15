@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <link rel='stylesheet' href='/stylesheets/index.css'/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <style>
+      .leaflet-top.leaflet-right{ 
+          margin-top: 70px;
+      }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+  </head>
+  <body>
+	<div class="auth">
+		<div class="wrapper">
+			<input type="button" name="sign-in" onClick='location.href="/login"' value="sign in"></input>
+			<input type="button" name="sign-up" onClick='location.href="/signup"' value="sign up"></input>
+      <input type="button" name="edit" onClick='location.href="/edit"' value="edit data"></input>
+		</div>
+	</div>
+	<div class="map" id='mapid'></div>
+	<script src="/javascripts/initmap.js"></script>
+  </body>
+</html>

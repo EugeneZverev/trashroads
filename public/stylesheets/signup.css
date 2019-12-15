@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins');
+
+body {
+	background-image: url(../images/background.png);
+	background-attachment: fixed;
+	background-size: cover;
+	height: 100%;
+	font-family: "Poppins", sans-serif;
+}
+a {
+	margin-top: 50px;
+	color: #92badd;
+	display: inline-block;
+	text-decoration: none;
+	font-weight: 400;
+}
+a:hover {
+	color: #000;
+}
+.login {
+	box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+	max-width: 350px;
+	height: 330px;
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%); 
+  	padding: 20px;
+	background: #fff;
+	border-radius: 10px 10px 10px 10px;
+	text-align: center;
+
+	display: flex;
+  	align-items: center;
+ 	flex-direction: column; 
+  	justify-content: center;
+
+}
+input[type="text"], input[type="password"], input[type="email"] {
+	width: 230px;
+	height: 30px;
+	font-size: 12px;
+	margin-bottom: 20px;
+	background-color: #f6f6f6;
+  	border: none;
+	border-radius: 10px 10px 10px 10px;
+	padding-left: 10px;
+}
+
+input[type="submit"] {
+	background-color:  #5cd65c;
+  	border: none;
+  	font-family: "Poppins", sans-serif;
+  	height: 25px;
+  	width: 70px;
+	font-weight: 400;
+	color:  #fff;
+	border-radius: 10px 10px 10px 10px;
+}
+
+input[type="submit"]:hover {
+	color:  #000;
+}
