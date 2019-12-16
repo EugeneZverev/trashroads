@@ -178,18 +178,32 @@ map.on('click', e => {
 
 map.on('pm:create', e => {
 	currentCreatedLayer = e.layer;
-	currentLayersList.push(currentCreatedLayer)
-	console.log(currentCreatedLayer.toGeoJSON())
+	currentLayersList.push(currentCreatedLayer);
 
 	currentCreatedLayer.on('pm:edit', e => {
-		console.log('edited')
-		console.log(currentLayersList)
+		console.log('edited');
 	});
 
 	currentCreatedLayer.on('click', e => {
 		console.log('CATCHED BITCH')
-		console.log(e.target._latlngs)
-		console.log(e.target)
+		catchedLayer = e.target;
+		currentCoordinates = catchedLayer._latlngs;
+		//console.log(currentCoordinates);
+		//console.log(catchedLayer);
+		newLayer = L.geoJSON().addTo(map);
+
+		bLng = currentCoordinates[0].lng;
+		bLat = currentCoordinates[0].lat;
+		eLng = currentCoordinates[1].lng;
+		eLat = currentCoordinates[1].lat;
+		rating = 4;
+
+		newLayer.addData(getGeoJSONLine(666, bLng, bLat, eLng, eLat, null, null, rating));
+		newLayer.eachLayer(function(layer) {  
+			layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+		});
+		catchedLayer.remove();
+		console.log(currentLayersList)
 	});
 
 	console.log(currentLayersList)
