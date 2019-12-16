@@ -27,8 +27,8 @@ function add(bLng, bLat, eLng, eLat, img, note, date, rating) {
 	        console.log(error);
 	    });
 }
-/*ar sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database("trashroads.db"); 
+var sqlite3 = require("sqlite3").verbose();
+var db = new sqlite3.Database("trashroadsFake.db"); 
 
 /*создание таблицы Route
 db.run("CREATE TABLE Routes(id PRIMARY KEY, bLng REAL NOT NULL, bLat REAL NOT NULL, eLng REAL NOT NULL, eLat REAL NOT NULL, img TEXT, note TEXT, rating INTEGER NOT NULL)", function(err){
@@ -37,7 +37,7 @@ db.run("CREATE TABLE Routes(id PRIMARY KEY, bLng REAL NOT NULL, bLat REAL NOT NU
 	} 
 	else{
 		db.close();
-		console.log("created db: trashroads.db");
+		console.log("created db: trashroadsFake.db");
 	}
 });*/
 
@@ -61,8 +61,53 @@ statement.run(15, 44.008913, 56.327463, 44.009039, 56.327635, null, null, 4);
 statement.run(16, 44.009224, 56.327293, 44.009098, 56.327381, null, null, 2);
 statement.finalize();*/
 
-/*вывод всех записей таблицы Route в консоль
-db.all("SELECT * FROM Routes", function(err, rows){
+/*фэйковые данные
+let statement = db.prepare("INSERT INTO Routes VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+statement.run(1, 44.018847, 56.328959, 44.017877, 56.327816, null, null, 3);
+statement.run(2, 44.018847, 56.328959, 44.017086, 56.329393, null, null, 3);
+statement.run(3, 44.017877, 56.327816, 44.015796, 56.328358, null, null, 3);
+statement.run(4, 44.017086, 56.329393, 44.016852, 56.329415, null, null, 4);
+statement.run(5, 44.016852, 56.329415, 44.015796, 56.328358, null, null, 2);
+statement.run(6, 44.015796, 56.328358, 44.015458, 56.328418, null, null, 1);
+statement.run(7, 44.015458, 56.328418, 44.013309, 56.328581, null, null, 4);
+statement.run(8, 44.013309, 56.328581, 44.012234, 56.328682, null, null, 3);
+statement.run(9, 44.012234, 56.328682, 44.012287, 56.32956, null, null, 4);
+statement.run(10, 44.016852, 56.329415, 44.012287, 56.32956, null, null, 3);
+statement.run(11, 44.015796, 56.328358, 44.014261, 56.326808, null, null, 3);
+statement.run(12, 44.014261, 56.326808, 44.016595, 56.3263, null, null, 4);
+statement.run(13, 44.018847, 56.328959, 44.016595, 56.3263, null, null, 4);
+statement.run(14, 44.021029, 56.325366, 44.016595, 56.3263, null, null, 3);
+statement.run(15, 44.021029, 56.325366, 44.022107, 56.326694, null, null, 4);
+statement.run(16, 44.021029, 56.325366, 44.02465, 56.324619, null, null, 2);
+statement.run(17, 44.02465, 56.324619, 44.025584, 56.325791, null, null, 1);
+statement.run(18, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
+statement.run(19, 44.030955, 56.323352, 44.031655, 56.324215, null, null, 3);
+statement.run(20, 44.031655, 56.324215, 44.025584, 56.325791, null, null, 2);
+statement.run(21, 44.031655, 56.324215, 44.032677, 56.325393, null, null, 4);
+statement.run(22, 44.032677, 56.325393, 44.026531, 56.326979, null, null, 4);
+statement.run(23, 44.02465, 56.324619, 44.023408, 56.32304, null, null, 3);
+statement.run(24, 44.023408, 56.32304, 44.01984, 56.323879, null, null, 4);
+statement.run(25, 44.01984, 56.3238799, 44.021029, 56.325366, null, null, 3);
+statement.run(26, 44.01984, 56.3238799, 44.015407, 56.324938, null, null, 1);
+statement.run(27, 44.015407, 56.324938, 44.016595, 56.3263, null, null, 2);
+statement.run(28, 44.015407, 56.324938, 44.013323, 56.322561, null, null, 4);
+statement.run(29, 44.015407, 56.324938, 44.012196, 56.325604, null, null, 3);
+statement.run(30, 44.012196, 56.325604, 44.014261, 56.326808, null, null, 2);
+statement.run(31, 44.012196, 56.325604, 44.008135, 56.326594, null, null, 1);
+statement.run(32, 44.012196, 56.325604, 44.008902, 56.324332, null, null, 4);
+statement.run(33, 44.008135, 56.326594, 44.007196, 56.32757, null, null, 2);
+statement.run(34, 44.008135, 56.326594, 44.006939, 56.326008, null, null, 3);
+statement.run(35, 44.008902, 56.324332, 44.006939, 56.326008, null, null, 2);
+statement.run(36, 44.007196, 56.32757, 44.008554, 56.328981, null, null, 1);
+statement.run(37, 44.007196, 56.32757, 44.005979, 56.326808, null, null, 4);
+statement.run(38, 44.006939, 56.326008, 44.005979, 56.326808, null, null, 3);
+statement.run(39, 44.008554, 56.328981, 44.012234, 56.328682, null, null, 4);
+statement.run(41, 44.008554, 56.328981, 44.009238, 56.329677, null, null, 3);
+statement.run(42, 44.009238, 56.329677, 44.012287, 56.32956, null, null, 2);
+statement.finalize();*/
+
+//вывод всех записей таблицы Route в консоль
+/*db.all("SELECT * FROM Routes", function(err, rows){
 	if(err)
 	{
 		console.log("ERROR");
@@ -89,8 +134,8 @@ statement.run(null, 16);
 statement.run("dad41278-4caf-11e9-92d8-09180d711f16.jpg", 15);
 statement.finalize();*/
 
-var pgp = require("pg-promise")(/*options*/);
-const cn = {
+//var pgp = require("pg-promise")(/*options*/);
+/*const cn = {
     host: 'localhost',
     port: 5432,
     database: 'trashroads',
@@ -98,7 +143,7 @@ const cn = {
     password: 'password'
 };
 
-const db = pgp(cn);
+const db = pgp(cn);*/
 
 /*db.multi("SELECT route FROM routes")
     .then(function (data) {
