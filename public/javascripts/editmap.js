@@ -20,6 +20,7 @@ map.pm.addControls({
   fillOpacity: 0.4,
 });*/
 
+let routesCount = 42;
 
 function readServerString(url, callback) {
     var req = new XMLHttpRequest();
@@ -167,6 +168,7 @@ getAndDrawSQLiteData();
 var layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
 let currentLayersList = []
+let checkedLayersList = []
 
 /*for development
 map.on('click', e => {
@@ -186,29 +188,42 @@ map.on('pm:create', e => {
 
 	currentCreatedLayer.on('click', e => {
 		console.log('CATCHED BITCH')
+		rating = prompt('УКАЖИТЕ СОСТОЯНИЕ УЧАСТКА(ОТ 1 - ОЧЕНЬ ПЛОХО, ДО 4 - ОТЛИЧНО', '');
 		catchedLayer = e.target;
-		currentCoordinates = catchedLayer._latlngs;
-		//console.log(currentCoordinates);
-		//console.log(catchedLayer);
+		currentCoordinatesArray = catchedLayer._latlngs;
 		newLayer = L.geoJSON().addTo(map);
 
-		bLng = currentCoordinates[0].lng;
-		bLat = currentCoordinates[0].lat;
-		eLng = currentCoordinates[1].lng;
-		eLat = currentCoordinates[1].lat;
-		rating = 4;
+		for (let point = 0; point < currentCoordinatesArray.length-1; point++){
+			console.log(currentCoordinatesArray[point])
+			bLng = currentCoordinatesArray[point].lng;
+			bLat = currentCoordinatesArray[point].lat;
+			eLng = currentCoordinatesArray[point+1].lng;
+			eLat = currentCoordinatesArray[point+1].lat;
+			currentRoute = getGeoJSONLine(routesCount, bLng, bLat, eLng, eLat, null, null, rating);
+			newLayer.addData(currentRoute);
+			routesCount++;
+		}
 
-		newLayer.addData(getGeoJSONLine(666, bLng, bLat, eLng, eLat, null, null, rating));
 		newLayer.eachLayer(function(layer) {  
-			layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+				layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+				checkedLayersList.push(layer);
+				console.log(checkedLayersList)
 		});
 		catchedLayer.remove();
-		console.log(currentLayersList)
 	});
 
-	console.log(currentLayersList)
+	//console.log(currentLayersList)
 	console.log('created')
 });
+
+/*const button = document.getElementById("save");
+button.addEventListener('click', function(e) {
+  answer = confirm('Сохранить?');
+  console.log(answer);
+  if (answer){
+
+  }
+});*/
 
 
 /*var dynamicRoutesPGLayer = L.geoJSON().addTo(map);
