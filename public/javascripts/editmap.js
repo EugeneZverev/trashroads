@@ -1,26 +1,49 @@
 let mapCenter = [56.326827, 44.018];
-
-var map = L.map('mapid', {zoomControl: false}).setView(mapCenter, 16); 
+let map = L.map('mapid', {zoomControl: false}).setView(mapCenter, 16); 
 
 map.pm.addControls({
-  position: 'topleft',
-  drawMarker: false,
-  drawCircleMarker: false,
-  drawRectangle: false,
-  drawPolygon: false,
-  drawMarker: false,
-  drawCircle: false,
-  cutPolygon: false,
-  removalMode: false
+  	position: 'topleft',
+  	drawMarker: false,
+  	drawCircleMarker: false,
+  	drawRectangle: false,
+  	drawPolygon: false,
+  	drawMarker: false,
+  	drawCircle: false,
+  	cutPolygon: false,
+  	removalMode: false
 });
 
-/*map.pm.setPathOptions({
-  color: 'orange',
-  fillColor: 'green',
-  fillOpacity: 0.4,
-});*/
+let secondTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}),
+	mainTile = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+	maxZoom: 19,
+	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+	id: 'mapbox.streets'
+}), 
+	darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 19
+}).addTo(map);
 
-let routesCount = 42;
+let routesCountFromBase = null;
+let currentID = null;
+
+let routesSQLiteLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);
+
+let basemapControl = {
+	"Дополнительная карта": secondTile,
+	"Карта улиц": mainTile,
+	"Тёмная карта": darkTheme  
+}, 
+layerControl = {
+  	"Фэйковые данные": routesSQLiteLayer
+}
+let layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
 function readServerString(url, callback) {
     var req = new XMLHttpRequest();
@@ -38,6 +61,7 @@ function readServerString(url, callback) {
     req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     req.send();
 }
+
 function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, rating) {
 	return {
             	"type": "Feature",
@@ -51,11 +75,13 @@ function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, rating) {
             	"properties": {
             	    "note": note,
             	    "rating": rating,
-                	"image": img
+                	"image": img,
+                	"date": null
             	},
             	"id": id
         	}
 }
+
 function getLineStyle(rating, weight, opacity) {
 	if(rating==1) color = "#cc0000";
 	if(rating==2) color = "#ff7800";
@@ -66,39 +92,16 @@ function getLineStyle(rating, weight, opacity) {
 				"weight": weight,
 				"opacity": opacity
 			}
-}/*
-function drawRoute(feature) {
-	L.geoJSON(feature, {
-		style: getLineStyle(feature.properties.rating, 4, 1) //5, 0.65
-	}).bindPopup(feature.properties.note + '<br>id:' + feature.id.toString()).addTo(map);	
 }
-function dynamicGetAndDrawPGData(query) {
-	readServerString(`/getpgdata/${query}`, function(err, response){
-		if(!err){
-			var result = JSON.parse(response)[0];
-			if(dynamicRoutesPGLayer) {
-				dynamicRoutesPGLayer.remove();
-				dynamicRoutesPGLayer = L.geoJSON().addTo(map);
-			}
-			for(var i = 0; i<result.length; i++){
-				var row = result[i];
-				dynamicRoutesPGLayer.addData(row.route);
-			}
-			dynamicRoutesPGLayer.eachLayer(function(layer) {  
-			  	layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-			});
-			console.log(dynamicRoutesPGLayer._layers);
-		}
-	});
-	console.log("success");
-}
-*/
+
 function getAndDrawSQLiteData() {
-	readServerString(`/getdata`, function(err, response){
+	readServerString(`/db/getdata`, function(err, response){
 		if(!err){
-			var result = JSON.parse(response);
+			let result = JSON.parse(response);
+			routesCountFromBase = result.length;
+			currentID = routesCountFromBase + 1;
 			for(var i = 0; i<result.length; i++){
-				var row = result[i];
+				let row = result[i];
 				currentRoute = getGeoJSONLine(row.id, row.bLng, row.bLat, row.eLng, row.eLat, row.img, row.note, row.rating);
 				routesSQLiteLayer.addData(currentRoute);
 			}
@@ -109,66 +112,19 @@ function getAndDrawSQLiteData() {
 	});
 	console.log("success");
 }
-/*
-function getURLFromLatLngBounds(bounds) {
-	return `${bounds.getNorthEast().lat}&${bounds.getNorthEast().lng}&${bounds.getSouthWest().lat}&${bounds.getSouthWest().lng}`;
-}*/
-var secondTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	maxZoom: 19,
-	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}),
-	mainTile = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-	maxZoom: 19,
-	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-		'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-		'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-	id: 'mapbox.streets'
-}), 
-	darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-	subdomains: 'abcd',
-	maxZoom: 19
-}).addTo(map);
 
-/*
-
-/*et r42 = getGeoJSONLine(42, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r43 = getGeoJSONLine(43, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r44 = getGeoJSONLine(44, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r45 = getGeoJSONLine(45, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r46 = getGeoJSONLine(46, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);*/
-     /**
-var routesLayer = L.geoJSON().addTo(map);
-
-/*routesLayer.addData(r42)
-routesLayer.addData(r43)
-routesLayer.addData(r44)
-routesLayer.addData(r45)
-
-*/
-/**
-routesLayer.eachLayer(function(layer) {  
-	layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-});
-*/
-let routesSQLiteLayer = L.geoJSON().addTo(map);
-/*
-var routesPGLayer = L.geoJSON().addTo(map);
-*/let basemapControl = {
-  "Дополнительная карта": secondTile,
-  "Карта улиц": mainTile,
-  "Тёмная карта": darkTheme  
-}, layerControl = {
-  //"Реальные данные": routesPGLayer,
-  "Фэйковые данные": routesSQLiteLayer
+function sendEditedDataToSQLite(query) {
+	readServerString(`/db/senddata/${query}`, function(err, response){
+		if(!err){
+			console.log(err);
+		}
+	});
 }
 
 getAndDrawSQLiteData();
 
-var layersController = L.control.layers(basemapControl, layerControl).addTo(map);
-
-let currentLayersList = []
-let checkedLayersList = []
+let currentLayersList = [];
+let checkedLayersList = [];
 
 /*for development
 map.on('click', e => {
@@ -179,6 +135,7 @@ map.on('click', e => {
 });*/
 
 map.on('pm:create', e => {
+	console.log(routesCountFromBase)
 	currentCreatedLayer = e.layer;
 	currentLayersList.push(currentCreatedLayer);
 
@@ -193,44 +150,40 @@ map.on('pm:create', e => {
 		currentCoordinatesArray = catchedLayer._latlngs;
 		newLayer = L.geoJSON().addTo(map);
 
-		for (let point = 0; point < currentCoordinatesArray.length-1; point++){
-			console.log(currentCoordinatesArray[point])
-			bLng = currentCoordinatesArray[point].lng;
-			bLat = currentCoordinatesArray[point].lat;
-			eLng = currentCoordinatesArray[point+1].lng;
-			eLat = currentCoordinatesArray[point+1].lat;
-			currentRoute = getGeoJSONLine(routesCount, bLng, bLat, eLng, eLat, null, null, rating);
-			newLayer.addData(currentRoute);
-			routesCount++;
+		if(rating==1 || rating==2 || rating==3 || rating==4){
+			for (let point = 0; point < currentCoordinatesArray.length-1; point++){
+				//console.log(currentCoordinatesArray[point])
+				bLng = currentCoordinatesArray[point].lng;
+				bLat = currentCoordinatesArray[point].lat;
+				eLng = currentCoordinatesArray[point+1].lng;
+				eLat = currentCoordinatesArray[point+1].lat;
+				currentRoute = getGeoJSONLine(currentID, bLng, bLat, eLng, eLat, null, null, rating);
+				newLayer.addData(currentRoute);
+				currentID++;
+			}
+			newLayer.eachLayer(function(layer) {  
+					layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+					checkedLayersList.push(layer.feature);
+			});
+			catchedLayer.remove();
 		}
 
-		newLayer.eachLayer(function(layer) {  
-				layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-				checkedLayersList.push(layer);
-				console.log(checkedLayersList)
-		});
-		catchedLayer.remove();
 	});
-
-	//console.log(currentLayersList)
 	console.log('created')
 });
 
-/*const button = document.getElementById("save");
+const button = document.getElementById("save");
 button.addEventListener('click', function(e) {
-  answer = confirm('Сохранить?');
+  answer = confirm('Сохранить и выйти (страница автоматически перенаправится через 6 секунд, подождите)?');
   console.log(answer);
   if (answer){
-
+  	console.log(JSON.stringify(checkedLayersList))
+  	if(checkedLayersList.length!=0){
+  		let objectToSend = JSON.stringify(checkedLayersList);
+		sendEditedDataToSQLite(objectToSend);
+  	}
+  	setTimeout(function run(){
+		document.location.href = "/";
+  	}, 6000);
   }
-});*/
-
-
-/*var dynamicRoutesPGLayer = L.geoJSON().addTo(map);
-let query = getURLFromLatLngBounds(map.getBounds());
-dynamicGetAndDrawPGData(query);
-
-map.on('zoom moveend', function() { 
-	let query = getURLFromLatLngBounds(map.getBounds());
-    dynamicGetAndDrawPGData(query);
-});*/
+});

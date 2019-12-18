@@ -8,7 +8,7 @@ router.post('/', function(req, res, next) {
 	db.all("SELECT * FROM Routes", function(err, rows){
 		if(err)
 		{
-			console.log("ERROR");
+			console.log("ERROR", err);
 		}
 		else
 		{

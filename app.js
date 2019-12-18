@@ -8,9 +8,11 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
 var signupRouter = require('./routes/signup');
-var databaseRouter = require('./routes/database');
+var databaseGetRouter = require('./routes/databaseGet');
 var dbpRouter = require('./routes/pg_database');
 var editMapRouter = require('./routes/edit');
+
+var databaseSendRouter = require('./routes/databaseSend');
 
 var app = express();
 
@@ -28,9 +30,11 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/login', loginRouter);
 app.use('/signup', signupRouter);
-app.use('/getdata', databaseRouter);
+app.use('/db/getdata', databaseGetRouter);
 app.use('/getpgdata', dbpRouter);
 app.use('/edit', editMapRouter);
+
+app.use('/db/senddata', databaseSendRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

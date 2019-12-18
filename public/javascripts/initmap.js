@@ -53,7 +53,7 @@ function drawRoute(feature) {
 	}).bindPopup(feature.properties.note + '<br>id:' + feature.id.toString()).addTo(map);	
 }
 function dynamicGetAndDrawPGData(query) {
-	readServerString(`/getpgdata/${query}`, function(err, response){
+	readServerString(`/db/getpgdata/${query}`, function(err, response){
 		if(!err){
 			var result = JSON.parse(response)[0];
 			if(dynamicRoutesPGLayer) {
@@ -73,7 +73,7 @@ function dynamicGetAndDrawPGData(query) {
 	console.log("success");
 }
 function getAndDrawSQLiteData() {
-	readServerString(`/getdata`, function(err, response){
+	readServerString(`/db/getdata`, function(err, response){
 		if(!err){
 			var result = JSON.parse(response);
 			for(var i = 0; i<result.length; i++){
