@@ -20,6 +20,14 @@ body {
   	margin-bottom: -70px;
   	pointer-events: auto;
 }
+
+.saved {
+	width: 60%;
+	background: rgba(0, 0, 0, 0.15);
+	margin-top: 40px;
+	position: relative;
+}
+
 input[type="button"] {
 	background-color:  #56baed;
   	border: none;
@@ -34,6 +42,11 @@ input[type="button"] {
 input[name="sign-in"] {
 	background-color: #5cd65c;
 }
+
+input[name="saveBtn"] {
+	background-color: #5cd65c;
+}
+
 input[name="edit"] {
 	background-color: #ff9999;
 }

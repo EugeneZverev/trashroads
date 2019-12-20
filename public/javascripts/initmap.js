@@ -109,32 +109,15 @@ var darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/
 
 }).addTo(map);
 
-/*et r42 = getGeoJSONLine(42, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r43 = getGeoJSONLine(43, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r44 = getGeoJSONLine(44, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r45 = getGeoJSONLine(45, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);
-let r46 = getGeoJSONLine(46, 44.02465, 56.324619, 44.030955, 56.323352, null, null, 4);*/
-//var routesLayer = L.geoJSON().addTo(map);
-/*routesLayer.addData(r42)
-routesLayer.addData(r43)
-routesLayer.addData(r44)
-routesLayer.addData(r45)
-routesLayer.eachLayer(function(layer) {  
-	layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-});*/
-
 let routesSQLiteLayer = L.geoJSON().addTo(map);
 
-//var routesPGLayer = L.geoJSON().addTo(map);
 let basemapControl = {
   "Дополнительная карта": secondTile,
   "Тёмная карта": darkTheme,
   "Карта улиц": mainTile
 }, layerControl = {
-  //"Реальные данные": routesPGLayer,
   "Фэйковые данные": routesSQLiteLayer
 }
-
 var layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
 /*map.on('click', e =>{

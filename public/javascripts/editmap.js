@@ -149,7 +149,6 @@ map.on('pm:create', e => {
 		catchedLayer = e.target;
 		currentCoordinatesArray = catchedLayer._latlngs;
 		newLayer = L.geoJSON().addTo(map);
-
 		if(rating==1 || rating==2 || rating==3 || rating==4){
 			for (let point = 0; point < currentCoordinatesArray.length-1; point++){
 				//console.log(currentCoordinatesArray[point])
@@ -167,7 +166,6 @@ map.on('pm:create', e => {
 			});
 			catchedLayer.remove();
 		}
-
 	});
 	console.log('created')
 });
