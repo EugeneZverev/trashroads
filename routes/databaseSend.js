@@ -27,7 +27,6 @@ router.post('/:query', function(req, res, next) {
 		console.log(`route ${id} is saved`)
 	}
 	statement.finalize();
-	console.log('lalka')
 });
 
 module.exports = router;
