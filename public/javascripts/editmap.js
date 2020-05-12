@@ -20,7 +20,8 @@ map.pm.addControls({
 let numberOfRoutesFromBase = null;	//количество участков, полученных из базы
 let currentID = null;	//номер текущего добавляемого участка
 
-let routesSQLiteLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);
+let routesRealPedestrianLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);		//реальные данные, собранные пешеходами, из базы PG
+let routesFakePGLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);				//фэйковые данные, из базы PG
 
 let basemapControl = {
 	"Карта улиц": mainTile,
@@ -28,11 +29,54 @@ let basemapControl = {
 	"Тёмная карта": darkTheme  
 };
 let layerControl = {
-  	"Фэйковые данные": routesSQLiteLayer
+	"Реальные пешеходные данные": routesRealPedestrianLayer,
+	"Фэйковые пешеходные данные": routesFakePGLayer
 };
 let layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
-function getAndDrawSQLiteData() {
+function getAndDrawRealRoutes(query){
+	readServerString(`/db/get_routes/${query}`, function(err, response){
+		if(!err){
+			let result = JSON.parse(response);
+			if(query==='real_pedestrian'){
+				for(let i = 0; i<result[0].length; i++){
+					let row = result[0][i];
+					let date = row.time_stamp;
+					let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.rating);
+					routesRealPedestrianLayer.addData(currentRoute);
+				}
+				routesRealPedestrianLayer.eachLayer(function(layer) {  
+				  	layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+				});
+			}
+			if(query==='osm_smoothness'){
+				routesRealOSMLayer.addData(result);
+				routesRealOSMLayer.eachLayer(function(layer) {  
+					let smoothness = layer.feature.properties.smoothness;
+				    let rating;
+				    if(smoothness=="excellent" || smoothness=="good") rating = 4;
+				    if(smoothness=="intermediate") rating = 3;
+				    if(smoothness=="bad" || smoothness=="very_bad") rating = 2;
+				    if(smoothness=="horrible" || smoothness=="very_horrible" || smoothness=="impassable") rating = 1;
+				  	layer.setStyle(getLineStyle(rating, 3, 1));
+				});			
+			}
+			if(query==='fake_pedestrian'){
+				for(let i = 0; i<result[0].length; i++){
+					let row = result[0][i];
+					let date = row.time_stamp;
+					let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.rating);
+					routesFakePGLayer.addData(currentRoute);
+				}
+				routesFakePGLayer.eachLayer(function(layer) {  
+				  	layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+				});
+			}
+		} else console.log(err);
+	});
+}
+
+/*function getAndDrawSQLiteData() {
 	readServerString(`/db/getdata`, function(err, response){
 		if(!err){
 			let result = JSON.parse(response);
@@ -50,16 +94,15 @@ function getAndDrawSQLiteData() {
 		}
 	});
 	//console.log("success");
-}
+}*/
 function sendEditedDataToSQLite(query) {
-	readServerString(`/db/senddata/${query}`, function(err, response){
-		if(!err){
-			console.log(err);
-		}
+	readServerString(`/db/send_routes/${query}`, function(err, response){
+		if(!err) console.log(err);
 	});
 }
 
-getAndDrawSQLiteData();
+getAndDrawRealRoutes('fake_pedestrian');
+getAndDrawRealRoutes('real_pedestrian');
 
 let currentLayersList = [];
 let checkedLayersList = [];
@@ -87,6 +130,9 @@ map.on('pm:create', e => {
 				let bLat = currentCoordinatesArray[point].lat;
 				let eLng = currentCoordinatesArray[point+1].lng;
 				let eLat = currentCoordinatesArray[point+1].lat;
+
+				let now = new Date();
+
 				let currentRoute = getGeoJSONLine(currentID, bLng, bLat, eLng, eLat, null, null, rating);
 				newLayer.addData(currentRoute);
 				currentID++;

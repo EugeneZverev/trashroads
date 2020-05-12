@@ -4,15 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');	//роутер для главной страницы проекта
-var usersRouter = require('./routes/users');	//роутер непонятно для чего (пока оставить до реализации функции регистрации)
-var loginRouter = require('./routes/login');	//роутер для страницы логина (нормальная, оставить до реализации функции регистрации)
-var signupRouter = require('./routes/signup');	//роутер для страницы регистрации (нормальная, оставить до реализации функции регистрации)
-var databaseGetRouter = require('./routes/databaseGet');	//роутер для получения данных из базы SQLite (удалить после создания базы Postgres)
-var databaseSendRouter = require('./routes/databaseSend');	//роутер для отправки данных в базу SQLite (удалить после создания базы Postgres)
-var dbpRouter = require('./routes/pg_database');			//старый роутер для получения данных из Postgres (заменить на новый)
-var editMapRouter = require('./routes/edit');	//роутер для страницы редактирования данных
-var getOSMDataFromServerRouter = require('./routes/getOSMDataFromServer');
+var indexPageRouter = require('./routes/indexPage');	//роутер для главной страницы проекта
+var editPageRouter = require('./routes/editPage');		//роутер для страницы редактирования данных
+var loginPageRouter = require('./routes/loginPage');	//роутер для страницы логина (нормальная, оставить до реализации функции регистрации)
+var signupPageRouter = require('./routes/signupPage');	//роутер для страницы регистрации (нормальная, оставить до реализации функции регистрации)
+//var usersPageRouter = require('./routes/usersPage');	//роутер непонятно для чего (пока оставить до реализации функции регистрации)
+var getRoutesFromServerRouter = require('./routes/getRoutesFromServer');	//роутер для получения данных от сервера
+var sendRoutesToServerRouter = require('./routes/sendRoutesToServer');		//роутер для отправки данных в базу Postgres таблицу fake_routes
 
 var app = express();
 
@@ -26,14 +24,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/login', loginRouter);
-app.use('/signup', signupRouter);
-app.use('/db/getdata', databaseGetRouter);
-app.use('/getpgdata', dbpRouter);
-app.use('/edit', editMapRouter);
-app.use('/db/senddata', databaseSendRouter);
-app.use('/get_osm_data', getOSMDataFromServerRouter);
+app.use('/', indexPageRouter);
+app.use('/edit', editPageRouter);
+app.use('/login', loginPageRouter);
+app.use('/signup', signupPageRouter);
+//app.use('/users', usersPageRouter);
+app.use('/db/get_routes', getRoutesFromServerRouter);
+app.use('/db/send_routes', sendRoutesToServerRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

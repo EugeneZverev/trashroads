@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var sqlite3 = require("sqlite3").verbose();
-var db = new sqlite3.Database("./trashroadsFake.db"); 
+let express = require('express');
+let router = express.Router();
+const db_config = require("../db_config.js");
+
+const database = db_config.database;
 
 router.post('/:query', function(req, res, next) {
 	res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
-	let statement = db.prepare("INSERT INTO Routes VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 	let receivedObjectsArray = req.params.query;
 	let receivedJSONObjectsArray = JSON.parse(receivedObjectsArray);
@@ -23,10 +23,15 @@ router.post('/:query', function(req, res, next) {
 		let bLat = coordinates[0][1];
 		let eLng = coordinates[1][0];
 		let eLat = coordinates[1][1];
-		statement.run(id, bLng, bLat, eLng, eLat, image, note, rating);
-		console.log(`route ${id} is saved`)
+		let pgData = [bLng, bLat, eLng,  eLat, image, note, date, rating];
+	    database.none(`INSERT INTO fake_routes (blng, blat, elng,  elat, img, note, time_stamp, rating) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, pgData)
+	        .then(() => {
+	            console.log(`route ${id} is saved`);
+	        })
+	        .catch(error => {
+	            console.log(error);
+	        });
 	}
-	statement.finalize();
 });
 
 module.exports = router;

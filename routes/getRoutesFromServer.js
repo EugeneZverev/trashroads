@@ -1,17 +1,44 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
+const fs = require("fs");
+const db_config = require("../db_config.js");
 
-var pgp = require("pg-promise")();
-const cn = {
-    host: 'localhost',
-    port: 5432,
-    database: 'trashroads',
-    user: 'admin',
-    password: 'password'
-};
-const db = pgp(cn);
+const database = db_config.database;
+let JSONFileContent = fs.readFileSync("./public/data/RU-NIZ.osm.geojson", "utf8");
 
 router.post('/:query', function(req, res, next) {
+	let answer = req.params.query;
+	if(answer==='real_pedestrian'){
+		res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
+		database.multi("SELECT * FROM routes")
+		    .then(function (data) {
+		    	let call = JSON.stringify(data);
+				res.write(call);
+				res.end();
+		    })
+		    .catch(function (error) {
+		        console.log("ERROR:", error);
+		    });
+	}
+	if(answer==='osm_smoothness'){
+		res.write(JSONFileContent);
+		res.end();
+	}
+	if(answer==='fake_pedestrian'){
+		res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
+		database.multi("SELECT * FROM fake_routes")
+		    .then(function (data) {
+		    	let call = JSON.stringify(data);
+				res.write(call);
+				res.end();
+		    })
+		    .catch(function (error) {
+		        console.log("ERROR:", error);
+		    });
+	}
+});
+
+/*router.post('/:query', function(req, res, next) {
 	console.log("request:" + req.params);
 	res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
 	let rect = req.params.query.split('&');
@@ -33,11 +60,11 @@ router.post('/:query', function(req, res, next) {
 				res.write(call);
 				res.end();
 	    	}
-	        console.log(data[0].length);
+	        //console.log(data[0].length);
 	    })
 	    .catch(function (error) {
 	        console.log("ERROR:", error);
 	    });
-})
+})*/
 
 module.exports = router;
