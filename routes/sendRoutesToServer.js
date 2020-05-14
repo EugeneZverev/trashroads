@@ -12,7 +12,6 @@ router.post('/:query', function(req, res, next) {
 	for(var route in receivedJSONObjectsArray){
 		let currentRoute = receivedJSONObjectsArray[route];
 		
-		let id = receivedJSONObjectsArray[route].id;
 		let coordinates = receivedJSONObjectsArray[route].geometry.coordinates;
 		let rating = receivedJSONObjectsArray[route].properties.rating;
 		let note = receivedJSONObjectsArray[route].properties.note;
@@ -26,7 +25,7 @@ router.post('/:query', function(req, res, next) {
 		let pgData = [bLng, bLat, eLng,  eLat, image, note, date, rating];
 	    database.none(`INSERT INTO fake_routes (blng, blat, elng,  elat, img, note, time_stamp, rating) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, pgData)
 	        .then(() => {
-	            console.log(`route ${id} is saved`);
+	            console.log(`route is saved`);
 	        })
 	        .catch(error => {
 	            console.log(error);

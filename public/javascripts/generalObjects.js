@@ -15,7 +15,7 @@ let darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/
     maxZoom: 19
 });
 
-function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, rating) {
+function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, time_stamp, rating) {
 	return {
             	"type": "Feature",
             	"geometry": {
@@ -29,7 +29,7 @@ function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, rating) {
             	    "note": note,
             	    "rating": rating,
                 	"image": img,
-                	"date": null
+                	"date": time_stamp
             	},
             	"id": id
         	}
@@ -62,6 +62,35 @@ function readServerString(url, callback) {
     req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     req.send();
 }
+function getAndDrawRealRoutes(query, workingLayer){
+    readServerString(`/db/get_routes/${query}`, function(err, response){
+        if(!err){
+            let result = JSON.parse(response);
+            if(query==='real_pedestrian' || query==='fake_pedestrian'){
+                for(let i = 0; i<result[0].length; i++){
+                    let row = result[0][i];
+                    let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.time_stamp, row.rating);
+                    workingLayer.addData(currentRoute);
+                }
+                workingLayer.eachLayer(function(layer) {  
+                    layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+                });
+            }
+            if(query==='osm_smoothness'){
+                workingLayer.addData(result);
+                workingLayer.eachLayer(function(layer) {  
+                    let smoothness = layer.feature.properties.smoothness;
+                    let rating;
+                    if(smoothness=="excellent" || smoothness=="good") rating = 4;
+                    if(smoothness=="intermediate") rating = 3;
+                    if(smoothness=="bad" || smoothness=="very_bad") rating = 2;
+                    if(smoothness=="horrible" || smoothness=="very_horrible" || smoothness=="impassable") rating = 1;
+                    layer.setStyle(getLineStyle(rating, 3, 1));
+                });
+            }
+        } else console.log(err);
+    });
+}
 
-export {getGeoJSONLine, getLineStyle, readServerString};
+export {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes};
 export {mainTile, secondTile, darkTheme};

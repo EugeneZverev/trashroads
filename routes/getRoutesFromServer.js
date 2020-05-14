@@ -8,9 +8,12 @@ let JSONFileContent = fs.readFileSync("./public/data/RU-NIZ.osm.geojson", "utf8"
 
 router.post('/:query', function(req, res, next) {
 	let answer = req.params.query;
-	if(answer==='real_pedestrian'){
+	if(answer==='real_pedestrian' || answer==='fake_pedestrian'){
+		let tableName = '';
+		if(answer==='real_pedestrian') tableName = 'routes';
+		if(answer==='fake_pedestrian') tableName = 'fake_routes';
 		res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
-		database.multi("SELECT * FROM routes")
+		database.multi(`SELECT * FROM ${tableName}`)
 		    .then(function (data) {
 		    	let call = JSON.stringify(data);
 				res.write(call);
@@ -18,25 +21,15 @@ router.post('/:query', function(req, res, next) {
 		    })
 		    .catch(function (error) {
 		        console.log("ERROR:", error);
-		    });
+		    });	
 	}
 	if(answer==='osm_smoothness'){
 		res.write(JSONFileContent);
 		res.end();
 	}
-	if(answer==='fake_pedestrian'){
-		res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
-		database.multi("SELECT * FROM fake_routes")
-		    .then(function (data) {
-		    	let call = JSON.stringify(data);
-				res.write(call);
-				res.end();
-		    })
-		    .catch(function (error) {
-		        console.log("ERROR:", error);
-		    });
-	}
 });
+
+module.exports = router;
 
 /*router.post('/:query', function(req, res, next) {
 	console.log("request:" + req.params);
@@ -66,5 +59,3 @@ router.post('/:query', function(req, res, next) {
 	        console.log("ERROR:", error);
 	    });
 })*/
-
-module.exports = router;
