@@ -62,21 +62,22 @@ function readServerString(url, callback) {
     req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     req.send();
 }
-function getAndDrawRealRoutes(query, workingLayer){
-    readServerString(`/db/get_routes/${query}`, function(err, response){
+function getAndDrawRealRoutes(layerName, workingLayer, windowBoundsURL){
+    readServerString(`/db/get_routes/${layerName}+${windowBoundsURL}`, function(err, response){
         if(!err){
             let result = JSON.parse(response);
-            if(query==='real_pedestrian' || query==='fake_pedestrian'){
+            if(layerName==='real_pedestrian' || layerName==='fake_pedestrian'){
                 for(let i = 0; i<result[0].length; i++){
                     let row = result[0][i];
                     let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.time_stamp, row.rating);
                     workingLayer.addData(currentRoute);
                 }
+                console.log(layerName, result[0].length);
                 workingLayer.eachLayer(function(layer) {  
                     layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
                 });
             }
-            if(query==='osm_smoothness'){
+            if(layerName==='osm_smoothness'){
                 workingLayer.addData(result);
                 workingLayer.eachLayer(function(layer) {  
                     let smoothness = layer.feature.properties.smoothness;
@@ -91,6 +92,33 @@ function getAndDrawRealRoutes(query, workingLayer){
         } else console.log(err);
     });
 }
+function getURLFromLatLngBounds(bounds) {
+    let northEastLat = bounds.getNorthEast().lat;
+    let northEastLng = bounds.getNorthEast().lng;
+    let southWestLat = bounds.getSouthWest().lat;
+    let southWestLng = bounds.getSouthWest().lng;
+    return `${northEastLat}&${northEastLng}&${southWestLat}&${southWestLng}`;
+}
 
-export {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes};
+export {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes, getURLFromLatLngBounds};
 export {mainTile, secondTile, darkTheme};
+
+/*function dynamicGetAndDrawPGData(query) {
+    readServerString(`/db/getpgdata/${query}`, function(err, response){
+        if(!err){
+            let result = JSON.parse(response)[0];
+            if(dynamicRoutesPGLayer) {
+                dynamicRoutesPGLayer.remove();
+                dynamicRoutesPGLayer = L.geoJSON().addTo(map);
+            }
+            for(let i = 0; i<result.length; i++){
+                let row = result[i];
+                dynamicRoutesPGLayer.addData(row.route);
+            }
+            dynamicRoutesPGLayer.eachLayer(function(layer) {  
+                layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+            });
+            //console.log(dynamicRoutesPGLayer._layers);
+        } else console.log(err);
+    });
+}*/

@@ -1,4 +1,4 @@
-import {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes} from './generalObjects.js';		//импортируем функции из файла
+import {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes, getURLFromLatLngBounds} from './generalObjects.js';		//импортируем функции из файла
 import {mainTile, secondTile, darkTheme} from './generalObjects.js';	//импортируем объекты из файла
 
 function sendEditedDataToSQLite(query) {
@@ -23,6 +23,11 @@ map.pm.addControls({
   	removalMode: false
 });
 
+let routesRealPedestrianLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);		//реальные данные, собранные пешеходами, из базы PG
+let routesFakePGLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);				//фэйковые данные, из базы PG
+
+let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
+
 let basemapControl = {
 	"Карта улиц": mainTile,
 	"Дополнительная карта": secondTile,
@@ -34,11 +39,8 @@ let layerControl = {
 };
 let layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
-let routesRealPedestrianLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);		//реальные данные, собранные пешеходами, из базы PG
-let routesFakePGLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);				//фэйковые данные, из базы PG
-
-getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer);
-getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer);
+getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
+getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer, windowBoundsURL);
 
 let currentLayersList = [], checkedLayersList = [];
 
