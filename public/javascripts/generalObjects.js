@@ -65,30 +65,32 @@ function readServerString(url, callback) {
 function getAndDrawRealRoutes(layerName, workingLayer, windowBoundsURL){
     readServerString(`/db/get_routes/${layerName}+${windowBoundsURL}`, function(err, response){
         if(!err){
-            let result = JSON.parse(response);
-            if(layerName==='real_pedestrian' || layerName==='fake_pedestrian'){
-                for(let i = 0; i<result[0].length; i++){
-                    let row = result[0][i];
-                    let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.time_stamp, row.rating);
-                    workingLayer.addData(currentRoute);
+            if(response!=="Null response"){
+                let result = JSON.parse(response);
+                if(layerName==='real_pedestrian' || layerName==='fake_pedestrian'){
+                    for(let i = 0; i<result[0].length; i++){
+                        let row = result[0][i];
+                        let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.time_stamp, row.rating);
+                        workingLayer.addData(currentRoute);
+                    }
+                    console.log(`The number of ${layerName} objects within the browser window:`, result[0].length);
+                    workingLayer.eachLayer(function(layer) {  
+                        layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
+                    });
                 }
-                console.log(layerName, result[0].length);
-                workingLayer.eachLayer(function(layer) {  
-                    layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-                });
-            }
-            if(layerName==='osm_smoothness'){
-                workingLayer.addData(result);
-                workingLayer.eachLayer(function(layer) {  
-                    let smoothness = layer.feature.properties.smoothness;
-                    let rating;
-                    if(smoothness=="excellent" || smoothness=="good") rating = 4;
-                    if(smoothness=="intermediate") rating = 3;
-                    if(smoothness=="bad" || smoothness=="very_bad") rating = 2;
-                    if(smoothness=="horrible" || smoothness=="very_horrible" || smoothness=="impassable") rating = 1;
-                    layer.setStyle(getLineStyle(rating, 3, 1));
-                });
-            }
+                if(layerName==='osm_smoothness'){
+                    workingLayer.addData(result);
+                    workingLayer.eachLayer(function(layer) {  
+                        let smoothness = layer.feature.properties.smoothness;
+                        let rating;
+                        if(smoothness=="excellent" || smoothness=="good") rating = 4;
+                        if(smoothness=="intermediate") rating = 3;
+                        if(smoothness=="bad" || smoothness=="very_bad") rating = 2;
+                        if(smoothness=="horrible" || smoothness=="very_horrible" || smoothness=="impassable") rating = 1;
+                        layer.setStyle(getLineStyle(rating, 3, 1));
+                    });
+                }
+            }      
         } else console.log(err);
     });
 }
@@ -102,23 +104,3 @@ function getURLFromLatLngBounds(bounds) {
 
 export {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes, getURLFromLatLngBounds};
 export {mainTile, secondTile, darkTheme};
-
-/*function dynamicGetAndDrawPGData(query) {
-    readServerString(`/db/getpgdata/${query}`, function(err, response){
-        if(!err){
-            let result = JSON.parse(response)[0];
-            if(dynamicRoutesPGLayer) {
-                dynamicRoutesPGLayer.remove();
-                dynamicRoutesPGLayer = L.geoJSON().addTo(map);
-            }
-            for(let i = 0; i<result.length; i++){
-                let row = result[i];
-                dynamicRoutesPGLayer.addData(row.route);
-            }
-            dynamicRoutesPGLayer.eachLayer(function(layer) {  
-                layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-            });
-            //console.log(dynamicRoutesPGLayer._layers);
-        } else console.log(err);
-    });
-}*/

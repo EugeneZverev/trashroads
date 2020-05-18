@@ -85,3 +85,24 @@ saveButton.addEventListener('click', function(e){
   		}, 6000);
   	}
 });
+
+let canSend = true;
+
+map.on('zoom moveend', function() { 
+	if(canSend===true){
+		canSend = false;
+		let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
+	    
+		layersController.removeLayer(routesFakePGLayer);
+		map.removeLayer(routesFakePGLayer);
+		routesFakePGLayer = L.geoJSON().addTo(map);
+
+		getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
+
+		layersController.addOverlay(routesFakePGLayer, 'Фэйковые пешеходные данные');
+
+		setTimeout(function run(){
+			canSend = true;
+  		}, 1000);
+	}
+});

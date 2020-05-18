@@ -17,9 +17,9 @@ let basemapControl = {
   "Карта улиц": mainTile
 };
 let layerControl = {
+  "Данные OSM (smoothness)": routesRealOSMLayer,
   "Реальные пешеходные данные": routesRealPedestrianLayer,
-  "Фэйковые пешеходные данные": routesFakePGLayer,
-  "Данные OSM (smoothness)": routesRealOSMLayer
+  "Фэйковые пешеходные данные": routesFakePGLayer
 };
 let layersController = L.control.layers(basemapControl, layerControl).addTo(map);
 
@@ -27,16 +27,23 @@ getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
 getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer, windowBoundsURL);
 getAndDrawRealRoutes('osm_smoothness', routesRealOSMLayer, windowBoundsURL);
 
-/*let canSend = true;
+let canSend = true;
 
 map.on('zoom moveend', function() { 
 	if(canSend===true){
 		canSend = false;
 		let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
-	    getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
-		getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer, windowBoundsURL);
+	    
+		layersController.removeLayer(routesFakePGLayer);
+		map.removeLayer(routesFakePGLayer);
+		routesFakePGLayer = L.geoJSON().addTo(map);
+
+		getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
+
+		layersController.addOverlay(routesFakePGLayer, 'Фэйковые пешеходные данные');
+
 		setTimeout(function run(){
 			canSend = true;
-  		}, 3000);
+  		}, 1000);
 	}
-});*/
+});

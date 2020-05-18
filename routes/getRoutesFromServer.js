@@ -17,11 +17,20 @@ router.post('/:query', function(req, res, next) {
 		if(answer==='real_pedestrian') tableName = 'routes';
 		if(answer==='fake_pedestrian') tableName = 'fake_routes';
 		res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
-		database.multi(`SELECT * FROM ${tableName}`)
+		database.multi(`SELECT * FROM ${tableName} WHERE (blng >= ${southWestLng} AND blng <= ${northEastLng}` +
+					   `OR elng >= ${southWestLng} AND elng <= ${northEastLng})` +
+				  	   `AND (blat >= ${southWestLat} AND blat <= ${northEastLat}` +
+				 	   `OR elat >= ${southWestLat} AND elat <= ${northEastLat});`)
 		    .then(function (data) {
-			    let call = JSON.stringify(data);
-				res.write(call);
-				res.end();
+		    	if(data[0].length != 0){
+			    	let call = JSON.stringify(data);
+					res.write(call);
+					res.end();
+		    	}
+		    	else{
+		    		res.write("Null response");
+					res.end();
+		    	}
 		    })
 		    .catch(function (error) {
 		        console.log("ERROR:", error);
@@ -34,18 +43,3 @@ router.post('/:query', function(req, res, next) {
 });
 
 module.exports = router;
-
-		/*database.multi(`SELECT * FROM ${tableName} WHERE (blng >= ${southWestLng} AND blng <= ${northEastLng}` +
-					   `OR elng >= ${southWestLng} AND elng <= ${northEastLng})` +
-				  	   `AND (blat >= ${southWestLat} AND blat <= ${northEastLat}` +
-				 	   `OR elat >= ${southWestLat} AND elat <= ${northEastLat});`)
-		    .then(function (data) {
-		    	if(data[0].length != 0){
-			    	let call = JSON.stringify(data);
-					res.write(call);
-					res.end();
-		    	}
-		    })
-		    .catch(function (error) {
-		        console.log("ERROR:", error);
-		    });*/
