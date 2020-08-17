@@ -2,7 +2,7 @@ import {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes, ge
 import {mainTile, secondTile, darkTheme} from './generalObjects.js';	//импортируем объекты из файла
 
 function sendEditedDataToSQLite(query) {
-	readServerString(`/db/send_routes/${query}`, function(err, response){
+	//readServerString(`/db/send_routes/${query}`, function(err, response){
 		if(!err) console.log(err);
 	});
 }
