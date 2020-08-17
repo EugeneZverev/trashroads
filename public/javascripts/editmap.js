@@ -7,7 +7,7 @@ function sendEditedDataToSQLite(query) {
 	});
 }
 
-let mapCenter = [56.326827, 44.018];	//устанавливаем координаты центра карты
+let mapCenter = [56.326827, 44.018];	///устанавливаем координаты центра карты
 let map = L.map('mapid', {zoomControl: false}).setView(mapCenter, 16);	//создаём объект карты с масштабом
 darkTheme.addTo(map);
 
