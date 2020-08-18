@@ -1,5 +1,5 @@
 const cn = {
-    connectionString: 'postgres://gkzsnnak:QMaM8omjlxPUJSMlEIJaXLD5w3crbP2U@isilo.db.elephantsql.com:5432/gkzsnnak',
+    connectionString: process.env.DB_CONNECTION,
     max: 5
 };
 const pgp = require('pg-promise')();
