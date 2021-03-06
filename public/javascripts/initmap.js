@@ -3,7 +3,7 @@ import {mainTile, secondTile, darkTheme} from './generalObjects.js';	//импо�
 
 let mapCenter = [56.326827, 44.018];	//устанавливаем координаты центра карты
 let map = L.map('mapid', {zoomControl: false}).setView(mapCenter, 16);	//создаём объект карты с масштабом 
-mainTile.addTo(map);
+secondTile.addTo(map);
 
 let routesRealOSMLayer = L.geoJSON().addTo(map);			//реальные данные OSM (smoothness), из .geojson
 let routesRealPedestrianLayer = L.geoJSON().addTo(map);		//реальные данные, собранные пешеходами, из базы PG
@@ -12,9 +12,8 @@ let routesFakePGLayer = L.geoJSON().addTo(map);				//фэйковые данны
 let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
 
 let basemapControl = {
-  "Дополнительная карта": secondTile,
-  "Тёмная карта": darkTheme,
-  "Карта улиц": mainTile
+  "Карта улиц": secondTile,
+  "Тёмная карта": darkTheme
 };
 let layerControl = {
   "Данные OSM (smoothness)": routesRealOSMLayer,

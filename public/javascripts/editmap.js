@@ -29,8 +29,7 @@ let routesFakePGLayer = L.geoJSON(null, {pmIgnore: true}).addTo(map);				//фэ�
 let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
 
 let basemapControl = {
-	"Карта улиц": mainTile,
-	"Дополнительная карта": secondTile,
+	"Карта улиц": secondTile,
 	"Тёмная карта": darkTheme  
 };
 let layerControl = {
