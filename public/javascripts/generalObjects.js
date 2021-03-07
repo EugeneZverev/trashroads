@@ -1,106 +1,104 @@
-let mainTile = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-    maxZoom: 19,
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    id: 'mapbox.streets'
-});
-let secondTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-});
-let darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+export const mainTile = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoiZXVnZW5lLXoiLCJhIjoiY2trendsaWxtMGZsZjJvbGIyeDBrdTE2ZiJ9.7nzaTORqoc2D5uVT07NQ7w'
+})
+export const darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
-});
+})
 
-function getGeoJSONLine(id, bLng, bLat, eLng, eLat, img, note, time_stamp, rating) {
+export function getGeoJSONLine(id, bLng, bLat, eLng, eLat, image, note, date, rating) {
 	return {
-            	"type": "Feature",
-            	"geometry": {
-                	"type": "LineString",
-                	"coordinates": [
+            	'type': 'Feature',
+            	'geometry': {
+                	'type': 'LineString',
+                	'coordinates': [
                 	    [bLng, bLat],
                 	    [eLng, eLat]
                 	]
             	},
-            	"properties": {
-            	    "note": note,
-            	    "rating": rating,
-                	"image": img,
-                	"date": time_stamp
+            	'properties': {
+            	    note,
+            	    rating,
+                	image,
+                	date
             	},
-            	"id": id
+            	id
         	}
 }
-function getLineStyle(rating, weight, opacity) {
-	let color = "";
-	if(rating==1) color = "#cc0000";
-	if(rating==2) color = "#ff7800";
-	if(rating==3) color = "#ffcc00";
-	if(rating==4) color = "#53ff1a";
+
+export function getLineStyle(rating) {
+	let color = ""
+	if (rating === 1) color = "#cc0000"
+	else if (rating === 2) color = "#ff7800"
+	else if (rating === 3) color = "#ffcc00"
+	else if (rating === 4) color = "#53ff1a"
+
 	return {
-				"color": color,
-				"weight": weight,
-				"opacity": opacity
-			}
-}
-function readServerString(url, callback) {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function(){
-        if(req.readyState ===4){
-            if(req.status===200){
-                callback(undefined, req.responseText);
-            } 
-            else{
-                callback(new Error(req.status));
+                color,
+                weight: 3,
+                opacity: 1
             }
-        }
-    };
-    req.open("POST", url, true);
-    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    req.send();
-}
-function getAndDrawRealRoutes(layerName, workingLayer, windowBoundsURL){
-    readServerString(`/db/get_routes/${layerName}+${windowBoundsURL}`, function(err, response){
-        if(!err){
-            if(response!=="Null response"){
-                let result = JSON.parse(response);
-                if(layerName==='real_pedestrian' || layerName==='fake_pedestrian'){
-                    for(let i = 0; i<result[0].length; i++){
-                        let row = result[0][i];
-                        let currentRoute = getGeoJSONLine(row.route_id, row.blng, row.blat, row.elng, row.elat, row.img, row.note, row.time_stamp, row.rating);
-                        workingLayer.addData(currentRoute);
-                    }
-                    console.log(`The number of ${layerName} objects within the browser window:`, result[0].length);
-                    workingLayer.eachLayer(function(layer) {  
-                        layer.setStyle(getLineStyle(layer.feature.properties.rating, 3, 1));
-                    });
-                }
-                if(layerName==='osm_smoothness'){
-                    workingLayer.addData(result);
-                    workingLayer.eachLayer(function(layer) {  
-                        let smoothness = layer.feature.properties.smoothness;
-                        let rating;
-                        if(smoothness=="excellent" || smoothness=="good") rating = 4;
-                        if(smoothness=="intermediate") rating = 3;
-                        if(smoothness=="bad" || smoothness=="very_bad") rating = 2;
-                        if(smoothness=="horrible" || smoothness=="very_horrible" || smoothness=="impassable") rating = 1;
-                        layer.setStyle(getLineStyle(rating, 3, 1));
-                    });
-                }
-            }      
-        } else console.log(err);
-    });
-}
-function getURLFromLatLngBounds(bounds) {
-    let northEastLat = bounds.getNorthEast().lat;
-    let northEastLng = bounds.getNorthEast().lng;
-    let southWestLat = bounds.getSouthWest().lat;
-    let southWestLng = bounds.getSouthWest().lng;
-    return `${northEastLat}&${northEastLng}&${southWestLat}&${southWestLng}`;
 }
 
-export {getGeoJSONLine, getLineStyle, readServerString, getAndDrawRealRoutes, getURLFromLatLngBounds};
-export {mainTile, secondTile, darkTheme};
+function getURLFromLatLngBounds(bounds) {
+    const northEastLat = bounds.getNorthEast().lat
+    const northEastLng = bounds.getNorthEast().lng
+    const southWestLat = bounds.getSouthWest().lat
+    const southWestLng = bounds.getSouthWest().lng
+
+    return `${northEastLat}&${northEastLng}&${southWestLat}&${southWestLng}`
+}
+
+export async function getAndDrawRealRoutes(layerName, workingLayer, windowBounds) {
+    const response = await fetch(`/db/get_routes/${layerName}+${getURLFromLatLngBounds(windowBounds)}`)
+
+    if (response.ok) { 
+        const routes = await response.json()
+
+        if (routes !== "Null response") {
+            if (layerName === 'real_pedestrian' || layerName === 'fake_pedestrian') {
+                for (let route of routes[0]) {
+                    const currentRoute = getGeoJSONLine(
+                        route.route_id, 
+                        route.blng, 
+                        route.blat, 
+                        route.elng, 
+                        route.elat, 
+                        route.img, 
+                        route.note, 
+                        route.time_stamp, 
+                        route.rating
+                    )
+                    workingLayer.addData(currentRoute)
+                }
+                console.log(`The number of ${layerName} objects within the browser window:`, routes[0].length)
+                workingLayer.eachLayer(layer => layer.setStyle(getLineStyle(layer.feature.properties.rating)))
+            }   
+
+            if (layerName === 'osm_smoothness') {
+                const OSMStyles = {
+                    'excellent': 4,
+                    'good': 4,
+                    'intermediate': 3,
+                    'bad': 2,
+                    'very_bad': 2,
+                    'horrible': 1,
+                    'very_horrible': 1,
+                    'impassable': 1
+                }
+
+                workingLayer.addData(routes)
+                workingLayer.eachLayer(layer => {  
+                    const smoothness = layer.feature.properties.smoothness
+                    layer.setStyle(getLineStyle(OSMStyles[smoothness]))
+                })
+            }
+        }
+    } else console.log("Ошибка HTTP: " + response.status)    
+}

@@ -1,48 +1,46 @@
-import {getAndDrawRealRoutes, getURLFromLatLngBounds} from './generalObjects.js';		//импортируем функции из файла
-import {mainTile, secondTile, darkTheme} from './generalObjects.js';	//импортируем объекты из файла
+import {getAndDrawRealRoutes} from './generalObjects.js'	 
+import {mainTile, darkTheme} from './generalObjects.js'	 
 
-let mapCenter = [56.326827, 44.018];	//устанавливаем координаты центра карты
-let map = L.map('mapid', {zoomControl: false}).setView(mapCenter, 16);	//создаём объект карты с масштабом 
-secondTile.addTo(map);
+const mapCenter = [56.326827, 44.018]	 
+const mapScale = 16
+const map = L.map('mapid', {zoomControl: false}).setView(mapCenter, mapScale)	 
 
-let routesRealOSMLayer = L.geoJSON().addTo(map);			//реальные данные OSM (smoothness), из .geojson
-let routesRealPedestrianLayer = L.geoJSON().addTo(map);		//реальные данные, собранные пешеходами, из базы PG
-let routesFakePGLayer = L.geoJSON().addTo(map);				//фэйковые данные, из базы PG
+mainTile.addTo(map)
 
-let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
+const routesRealOSMLayer = L.geoJSON().addTo(map)			
+const routesRealPedestrianLayer = L.geoJSON().addTo(map)		
+let routesFakePGLayer = L.geoJSON().addTo(map)		
 
-let basemapControl = {
-  "Карта улиц": secondTile,
+const basemapControl = {
+  "Карта улиц": mainTile,
   "Тёмная карта": darkTheme
-};
-let layerControl = {
+}
+const layerControl = {
   "Данные OSM (smoothness)": routesRealOSMLayer,
   "Реальные пешеходные данные": routesRealPedestrianLayer,
   "Фэйковые пешеходные данные": routesFakePGLayer
-};
-let layersController = L.control.layers(basemapControl, layerControl).addTo(map);
+}
+const layersController = L.control.layers(basemapControl, layerControl).addTo(map)
 
-getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
-getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer, windowBoundsURL);
-getAndDrawRealRoutes('osm_smoothness', routesRealOSMLayer, windowBoundsURL);
+const windowBounds = map.getBounds()
+getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBounds)
+getAndDrawRealRoutes('real_pedestrian', routesRealPedestrianLayer, windowBounds)
+getAndDrawRealRoutes('osm_smoothness', routesRealOSMLayer, windowBounds)
 
-let canSend = true;
-
-map.on('zoom moveend', function() { 
-	if(canSend===true){
-		canSend = false;
-		let windowBoundsURL = getURLFromLatLngBounds(map.getBounds());
+let canSend = true
+map.on('zoom moveend', () => { 
+	if (canSend) {
+		canSend = false
+		let windowBounds = map.getBounds()
 	    
-		layersController.removeLayer(routesFakePGLayer);
-		map.removeLayer(routesFakePGLayer);
-		routesFakePGLayer = L.geoJSON().addTo(map);
+		layersController.removeLayer(routesFakePGLayer)
+		map.removeLayer(routesFakePGLayer)
+		routesFakePGLayer = L.geoJSON().addTo(map)
 
-		getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBoundsURL);
+		getAndDrawRealRoutes('fake_pedestrian', routesFakePGLayer, windowBounds)
 
-		layersController.addOverlay(routesFakePGLayer, 'Фэйковые пешеходные данные');
+		layersController.addOverlay(routesFakePGLayer, 'Фэйковые пешеходные данные')
 
-		setTimeout(function run(){
-			canSend = true;
-  		}, 1000);
+		setTimeout(() => canSend = true, 1000)
 	}
-});
+})

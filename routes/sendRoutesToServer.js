@@ -1,36 +1,29 @@
-let express = require('express');
-let router = express.Router();
-const db_config = require("../db_config.js");
+let express = require('express')
+let router = express.Router()
+const db_config = require("../db_config.js")
 
-const database = db_config.database;
+const database = db_config.database
 
-router.post('/:query', function(req, res, next) {
-	res.writeHead(200, {"Content-Type": "text/plain; charset=utf-8"});
+router.post('/', (req, res, next) => {
+	let routes = req.body
+	
+	for (let route of routes) {
+		let coordinates = route.geometry.coordinates
+		let rating = route.properties.rating
+		let note = route.properties.note
+		let image = route.properties.image
+		let date = route.properties.date
 
-	let receivedObjectsArray = req.params.query;
-	let receivedJSONObjectsArray = JSON.parse(receivedObjectsArray);
-	for(var route in receivedJSONObjectsArray){
-		let currentRoute = receivedJSONObjectsArray[route];
-		
-		let coordinates = receivedJSONObjectsArray[route].geometry.coordinates;
-		let rating = receivedJSONObjectsArray[route].properties.rating;
-		let note = receivedJSONObjectsArray[route].properties.note;
-		let image = receivedJSONObjectsArray[route].properties.image;
-		let date = receivedJSONObjectsArray[route].properties.date;
+		let bLng = coordinates[0][0]
+		let bLat = coordinates[0][1]
+		let eLng = coordinates[1][0]
+		let eLat = coordinates[1][1]
 
-		let bLng = coordinates[0][0];
-		let bLat = coordinates[0][1];
-		let eLng = coordinates[1][0];
-		let eLat = coordinates[1][1];
-		let pgData = [bLng, bLat, eLng,  eLat, image, note, date, rating];
-	    database.none(`INSERT INTO fake_routes (blng, blat, elng,  elat, img, note, time_stamp, rating) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, pgData)
-	        .then(() => {
-	            console.log(`route is saved`);
-	        })
-	        .catch(error => {
-	            console.log(error);
-	        });
+		let pgData = [bLng, bLat, eLng,  eLat, image, note, date, rating]
+		database.none(`INSERT INTO fake_routes (blng, blat, elng,  elat, img, note, time_stamp, rating) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, pgData)
+	        .then(() => console.log(`route is saved`))
+	        .catch(error => console.log(error))
 	}
-});
+})
 
-module.exports = router;
+module.exports = router
